@@ -105,7 +105,7 @@ By adopting **cutting-edge sensor fusion** and **concurrent data processing**, t
 - **LED Indicators:** Change color or blink based on the severity of the alert.
 - **Active Buzzer:** Activates distinct audible tones when critical thresholds are surpassed.
 
-  ![Esquema UML del modelo ](https://github.com/Edwinguty2/Challenge_2/blob/main/Drawing%20UML.png)
+  ![Esquema UML del modelo ](https://github.com/Edwinguty2/Challenge_3/blob/main/Drawing%20UML.png)
 
 ---
 
