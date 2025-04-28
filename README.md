@@ -1,14 +1,14 @@
 # Real-Time Flood Monitoring and Alert System for Colombian Rivers (ESP32 Edition)
 
 ## Abstract
-Colombia’s complex topography and dynamic climate pose significant challenges in predicting and managing flood events. This repository presents an **enhanced IoT-based solution** that leverages an **ESP32 WROOM32** microcontroller running two concurrent tasks—one dedicated to sensor data processing and another to hosting a local web server. By integrating **multiple sensors** (ultrasonic, DHT11, tilt switch, raindrop detector, and a BMP180 barometric sensor over I2C), the system continuously monitors river conditions and environmental parameters. Sensor data are streamed over a LAN-based dashboard, providing **real-time insights** and early flood warnings to local communities and authorities.
+Colombia’s complex topography and dynamic climate pose significant challenges in predicting and managing flood events, now integrated with MQTT protocol for robust and scalable communication. This repository presents an **enhanced IoT-based solution** that leverages an **ESP32 WROOM32** microcontroller running three concurrent tasks—one dedicated to sensor data processing, another to hosting a local web server and the lastone uses MQTT Protocol to share the sensor data worldwide. By integrating **multiple sensors** (ultrasonic, DHT11, tilt switch, raindrop detector, and a BMP180 barometric sensor over I2C), the system continuously monitors river conditions and environmental parameters.  Sensor data collected locally are published to a Raspberry Pi 5 acting as an MQTT broker, gateway, and database server, subsequently relaying data to Ubidots' global MQTT broker. This setup facilitates both local and worldwide monitoring through dual dashboards, greatly enhancing real-time flood detection capabilities.
 
 ---
 
 ## Introduction
 Frequent river floods across Colombia—amplified by phenomena like La Niña—continue to threaten public safety, disrupt infrastructure, and strain emergency response efforts. Traditional monitoring systems often lack the agility to deliver **timely, localized alerts**, leaving communities vulnerable to sudden surges in water levels.
 
-This project builds upon previous work by replacing the Arduino Nano with an **ESP32 WROOM32**, offering **dual-thread concurrency** for simultaneous data processing and web service hosting. The system now streams sensor readings over a local network, providing a **scalable, modular**, and **near-real-time** framework for flood detection and early warning.
+This enhanced version of the system improves upon the ESP32-based dual-thread design by incorporating MQTT communications via a Raspberry Pi 5 with Mosquitto. It provides seamless integration between local sensor networks, local data storage, and global visualization platforms, thus enabling timely, informed decisions for disaster management.
 
 ---
 
@@ -20,8 +20,11 @@ The system aims to:
 - **Protect Infrastructure** – Early detection reduces damage to roads, bridges, and other essential services.
 - **Improve Emergency Management** – Centralized real-time data supports coordinated, data-driven responses.
 - **Facilitate Sustainable Urban Planning** – Historical sensor data can guide decisions on urban development, zoning, and flood defense systems.
-
-By adopting **cutting-edge sensor fusion** and **concurrent data processing**, this solution takes a proactive approach to disaster risk reduction.
+- **The new updates with IOT technologies and protocols will also**
+-   Extend Data Reach – Local data are now globally accessible via Ubidots.
+-   Real-Time Decision Making – Enhanced responsiveness through MQTT integration.
+-   Automated Alert Controls – Remote control via Ubidots switches for alarms.
+-   Enhanced Resilience – Reliable communications and data backup on the Raspberry Pi.
 
 ---
 
@@ -30,6 +33,7 @@ By adopting **cutting-edge sensor fusion** and **concurrent data processing**, t
 ### 1. Concurrent ESP32 Threads
 - **Measurement Task:** Collects data from all sensors, applies filtering and calibration, and packages the readings for internal processing.
 - **WebServer Task:** Runs an HTTP server on the local network, serving the front-end dashboard (HTML, CSS, and JavaScript) and providing real-time sensor data.
+- **MQTT Task:** Captures, calibrates, and publishes sensor data to Raspberry Pi via MQTT.
 
 ### 2. Sensor Modules
 - **Ultrasonic Sensor (Digital):** Measures river height with high accuracy.
@@ -46,6 +50,15 @@ By adopting **cutting-edge sensor fusion** and **concurrent data processing**, t
 ### 4. LAN-Restricted Web Dashboard
 - Renders real-time sensor readings and risk levels in a browser interface.
 - Provides charts, tables, and alert notifications for intuitive monitoring.
+
+### 5. Raspberry Pi 5 (Gateway, Broker, Database)
+- **MQTT Broker (Mosquitto):** Centralized messaging hub for sensor data.
+- **SQLite Database (challenge3.db):** Stores historical sensor readings for analysis.
+- **MQTT Relay:** Publishes latest database records to the Ubidots global MQTT broker.
+
+### 6. Ubidots Integration
+- **Global Dashboard:** Displays worldwide-accessible dashboards.
+- **Remote Alert Control:** MQTT switch control for activating the ESP32 alarm remotely.
 
 > ![Diagrama de bloques del sistema ](https://github.com/Edwinguty2/Challenge_3/blob/main/Diagrama%20de%20Bloques.jpeg)
 
@@ -80,11 +93,16 @@ By adopting **cutting-edge sensor fusion** and **concurrent data processing**, t
 - Offers local, on-site information about water levels and risk states.
 - Particularly useful when network connectivity is limited or during field inspections.
 
+### Raspberry Pi 5
+- **MQTT Broker:** Ensures efficient local data handling.
+- **Database Management:** SQLite for structured sensor data storage.
+- **Gateway Functions:** Bridges local sensor network and global cloud infrastructure.
+
 ---
 
 ## Software Design & Implementation
 
-### Dual-Thread Concurrency
+### Multi-Thread Concurrency
 - **Measurement Task:**
   - Samples sensors at predefined intervals.
   - Applies filtering and calibration to raw sensor data.
@@ -93,17 +111,29 @@ By adopting **cutting-edge sensor fusion** and **concurrent data processing**, t
   - Hosts an HTTP server that serves the front-end dashboard.
   - Responds to data requests with real-time sensor information.
   - Handles RESTful API endpoints for future enhancements, such as remote configuration updates.
+- **MQTT Task:**
+-   Sends MQTT packages to share the data world wide
 
+### MQTT Communication Protocol
+- ESP32 publishes JSON-formatted sensor readings to Raspberry Pi MQTT broker.
+- Raspberry Pi subscribes, logs data into SQLite, and forwards latest data points to Ubidots.
+
+### Alert Control via Ubidots
+- Raspberry Pi subscribes to an Ubidots MQTT switch topic.
+- Remote control of ESP32’s active buzzer alerts.
+
+### Database Integration
+- Structured SQL storage enables historical data analysis and future predictive modeling.
 ### Risk Evaluation Algorithm
 - **CALM:** Normal water levels with no significant wind or rain.
 - **LOW RISK:** Moderate wind or light rainfall detected.
 - **OVERFLOW RISK:** Combination of rising water levels, wind, and rain indicates an impending storm.
 - **HIGH RISK:** Rapid water-level rise accompanied by intense wind and heavy rainfall signals active flooding.
 
-### User Interface & Alerts
-- **LCD Display:** Cycles through system metrics and current risk levels.
-- **LED Indicators:** Change color or blink based on the severity of the alert.
-- **Active Buzzer:** Activates distinct audible tones when critical thresholds are surpassed.
+## Alert and Visualization
+- **Local Dashboard:** ESP32 provides immediate, LAN-restricted insights.
+- **Global Dashboard:** Ubidots integration facilitates worldwide monitoring.
+- **Remote Alert Activation:** Ubidots MQTT switches allow global control of ESP32 alarms.
 
   ![Esquema UML del modelo ](https://github.com/Edwinguty2/Challenge_3/blob/main/Drawing%20UML.png)
 
@@ -117,15 +147,16 @@ By adopting **cutting-edge sensor fusion** and **concurrent data processing**, t
 - **Scalability:** The modular design and dual-thread architecture allow for easy expansion and the addition of new sensor nodes.
 
 ---
+## Conclusion
+
 
 ## Self-Assessment of the Testing Protocol
 
-The testing protocol for the Real-Time Flood Monitoring and Alert System (ESP32 Edition) demonstrates a comprehensive and methodical approach to ensuring the reliability and functionality of the system prior to field deployment. It effectively addresses the verification of all critical components, including individual procedures for each sensor (ultrasonic, DHT11, BMP180, rain detector, and wind sensor), communication tests with the web interface, and validation of the alert system (buzzer, LEDs, LCD). The protocol is practical and replicable, offering clear steps that integrate both hardware and software validation, such as calibrating the ultrasonic sensor using real-world references, simulating rainfall and wind conditions, and testing REST API endpoints. The inclusion of a troubleshooting section enhances the protocol's usability by enabling quick identification and resolution of common issues. Although the current manual procedures are effective, future iterations could benefit from the introduction of automation, stress testing under prolonged use, and structured logging of test results to increase scalability and long-term reliability. Overall, the protocol supports the project's goal of delivering a robust, real-time flood monitoring system by ensuring that each module operates correctly under both normal and emergency conditions.
+The **ESP32 MQTT Enhanced Flood Monitoring System** significantly extends the capabilities of real-time environmental monitoring by integrating local sensor networks with global visualization platforms via MQTT. It provides a powerful, scalable solution for managing flood risks proactively, safeguarding lives and infrastructure. It effectively addresses the verification of all critical components, including individual procedures for each sensor (ultrasonic, DHT11, BMP180, rain detector, and wind sensor), communication tests with the web interface, and validation of the alert system (buzzer, LEDs, LCD).
 
 ---
-
 ## Conclusion
-The **Real-Time Flood Monitoring and Alert System (ESP32 Edition)** delivers a **robust, scalable**, and **cost-effective** solution to the challenges faced by flood-prone regions in Colombia. By combining **advanced sensor fusion**, **dual-thread processing**, and a **LAN-based dashboard**, the system provides rapid, reliable insights that can help **save lives** and **protect infrastructure**.
+The **ESP32 MQTT Enhanced Flood Monitoring System** significantly extends the capabilities of real-time environmental monitoring by integrating local sensor networks with global visualization platforms via MQTT. It provides a powerful, scalable solution for managing flood risks proactively, safeguarding lives and infrastructure.
 
 **Flood prevention starts with early detection—join us in creating safer, more resilient communities.**
 
@@ -133,20 +164,25 @@ The **Real-Time Flood Monitoring and Alert System (ESP32 Edition)** delivers a *
 
 ## Summary Comparison Table
 
-| **Feature**             | **Original (Arduino Nano)** | **ESP32 Edition**             |
-|-------------------------|-----------------------------|-------------------------------|
-| **Microcontroller**     | Arduino Nano                | ESP32 WROOM32 (Dual-Thread)   |
-| **Data Exchange**       | I2C, Digital pins           | Same + Streamed JSON over LAN |
-| **Rain Logic**          | Basic Thresholds            | Corrected and parametrized    |
-| **Architecture**        | Linear Loop                 | Dual-Thread with Interrupts   |
+| **Feature**          | **ESP32 Edition**           | **ESP32 MQTT Enhanced Edition** |
+|----------------------|-----------------------------|---------------------------------|
+| **Communication**    | LAN Only                    | LAN + MQTT (Local & Global)     |
+| **Data Storage**     | Local Memory                | SQLite on Raspberry Pi 5        |
+| **Remote Alerts**    | Manual Onsite Activation    | Ubidots MQTT-controlled         |
+| **Visualization**    | Local Dashboard             | Local & Global Dashboards       |
 
+## Experimental Setup and Results
+1. **Experimental Setup:**
+   - Scale rural house model for realistic testing.
+2. **Simulated Conditions:**
+   - Realistic flooding scenarios tested to validate system robustness.
 
 ---
-## Design Constraints Identified
- 
-LAN Restriction:   The system is limited to operating exclusively on a local area network (LAN), ensuring secure and controlled communication.
 
-Also, During the development of the Real-Time Flood Monitoring and Alert System (ESP32 Edition), several technical and operational constraints were identified that influenced the design and implementation decisions. One of the main limitations was the exposure of electronic components to environmental conditions, especially the wiring and sensors such as the rain detector, whose sensitivity to direct water contact posed electrical risks and required protective solutions that could increase both cost and logistical complexity for large-scale deployment. Additionally, there was a need to place sensors in strategic positions to ensure accurate readings, which is not always feasible in real-world settings due to physical or access limitations.
+## Challenges and Design Constraints
+
+- During the development of the Real-Time Flood Monitoring and Alert System (ESP32 Edition), the project faced multiple challenges and constraints. Limited testing time due to short lab access periods, and restricted hardware availability complicated the circuit assembly and thorough validation of the system. Additionally, technical limitations arose from the LAN-restricted design, intended to maintain secure and controlled local communications. Environmental exposure posed risks to electronic components, particularly the rain detector and wiring, necessitating protective solutions that added cost and complexity to potential large-scale deployment. Accurate sensor placement was another challenge due to physical and accessibility constraints.
+- Furthermore, integrating the MQTT protocol with Ubidots introduced submission limitations, requiring careful management of data frequency to avoid exceeding platform restrictions while maintaining real-time monitoring capabilities.
 
 ---
 
@@ -158,16 +194,6 @@ Also, During the development of the Real-Time Flood Monitoring and Alert System 
    Scenarios were recreated to mimic variations in water levels and typical rural environmental conditions.
 
 ---
-
-## Challenges Faced During Project Development
-1. **Limited Testing Time:**  
-   Sensors were available for lab use only for 2 hours, which significantly restricted testing time.
-
-2. **Holiday Impact:**  
-   The testing schedule was further affected by a holiday on Monday, reducing the opportunity to conduct tests under real conditions.
-
-3. **Logistical Limitations:**  
-   Coordination and planning of the tests were impacted by restrictions in lab availability and access.
 
 ## Contributors
 - **Edwin Alejandro Gutierrez Rodriguez**  
