@@ -112,7 +112,7 @@ The system aims to:
   - Responds to data requests with real-time sensor information.
   - Handles RESTful API endpoints for future enhancements, such as remote configuration updates.
 - **MQTT Task:**
--   Sends MQTT packages to share the data world wide
+  - Sends MQTT packages to share the data world wide
 
 ### MQTT Communication Protocol
 - ESP32 publishes JSON-formatted sensor readings to Raspberry Pi MQTT broker.
