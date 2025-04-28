@@ -47,7 +47,7 @@ By adopting **cutting-edge sensor fusion** and **concurrent data processing**, t
 - Renders real-time sensor readings and risk levels in a browser interface.
 - Provides charts, tables, and alert notifications for intuitive monitoring.
 
-> ![Diagrama de bloques del sistema ](https://github.com/Edwinguty2/Challenge_2/blob/main/Diagrama%20de%20Bloques.jpeg)
+> ![Diagrama de bloques del sistema ](https://github.com/Edwinguty2/Challenge_3/blob/main/Diagrama%20de%20Bloques.jpeg)
 
 ---
 
