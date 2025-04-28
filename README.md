@@ -199,7 +199,7 @@ The **ESP32 MQTT Enhanced Flood Monitoring System** significantly extends the ca
 
 - [¿Qué es MQTT? - AWS](https://aws.amazon.com/es/what-is/mqtt/)
 - [Explicación MQTT en español - YouTube (Parte 1)](https://www.youtube.com/watch?v=H0dDKo-xgUI&t=137s)
-- [Explicación MQTT en español - YouTube (Parte 1, repetido)](https://www.youtube.com/watch?v=H0dDKo-xgUI&t=137s)
+- [Cómo funciona MQTT - Curso de Arduino y Domótica - YouTube](https://www.youtube.com/watch?v=BFyPzC6No8k&t=546s)
 - [Tutorial MQTT Ubidots - YouTube](https://www.youtube.com/watch?v=e2uPHYnxkAE&t=114s)
 - [Control de dispositivos usando MQTT - Ubidots Help](https://help.ubidots.com/en/articles/654718-controlling-devices-using-mqtt)
 
